@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'safety_hub.dart';
-import 'main.dart';
+import 'login_page.dart';
 
 // Your exact file mappings linked directly to the structured UI rows
 import 'safe_path.dart';
