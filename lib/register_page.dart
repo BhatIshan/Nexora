@@ -14,11 +14,10 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _guardianEmailController = TextEditingController();
+  final _guardianPhoneController = TextEditingController();
 
   bool _isPasswordVisible = false;
   bool _isLoading = false;
-
-  // Role selection: 'user', 'guardian', 'admin'
   String _selectedRole = 'user';
 
   void _handleRegister() async {
@@ -27,8 +26,10 @@ class _RegisterPageState extends State<RegisterPage> {
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
     final guardianEmail = _guardianEmailController.text.trim();
+    final guardianPhone = _guardianPhoneController.text.trim();
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (name.isEmpty || email.isEmpty ||
+        password.isEmpty || confirmPassword.isEmpty) {
       _showSnack("Please fill out all fields.", Colors.redAccent);
       return;
     }
@@ -51,6 +52,7 @@ class _RegisterPageState extends State<RegisterPage> {
       password: password,
       role: _selectedRole,
       guardianEmail: _selectedRole == 'user' ? guardianEmail : null,
+      guardianPhone: _selectedRole == 'user' ? guardianPhone : null,
     );
 
     setState(() => _isLoading = false);
@@ -78,6 +80,7 @@ class _RegisterPageState extends State<RegisterPage> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _guardianEmailController.dispose();
+    _guardianPhoneController.dispose();
     super.dispose();
   }
 
@@ -105,14 +108,18 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 30),
 
-              // Name
-              _buildField(_nameController, "Full Name", Icons.person_outline),
+              // Full Name
+              _buildField(
+                  _nameController, "Full Name", Icons.person_outline),
               const SizedBox(height: 14),
 
               // Email
-              _buildField(_emailController, "Email Address",
-                  Icons.email_outlined,
-                  keyboardType: TextInputType.emailAddress),
+              _buildField(
+                _emailController,
+                "Email Address",
+                Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
+              ),
               const SizedBox(height: 14),
 
               // Password
@@ -146,9 +153,12 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 14),
 
               // Confirm Password
-              _buildField(_confirmPasswordController, "Confirm Password",
-                  Icons.lock_reset_rounded,
-                  obscure: true),
+              _buildField(
+                _confirmPasswordController,
+                "Confirm Password",
+                Icons.lock_reset_rounded,
+                obscure: true,
+              ),
               const SizedBox(height: 20),
 
               // Role Selection
@@ -161,12 +171,13 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(width: 10),
                   _roleChip('guardian', 'Guardian', Icons.shield_outlined),
                   const SizedBox(width: 10),
-                  _roleChip('admin', 'Admin', Icons.admin_panel_settings),
+                  _roleChip(
+                      'admin', 'Admin', Icons.admin_panel_settings),
                 ],
               ),
               const SizedBox(height: 14),
 
-              // Guardian email — only show if role is 'user'
+              // Guardian fields — only for user role
               if (_selectedRole == 'user') ...[
                 _buildField(
                   _guardianEmailController,
@@ -174,9 +185,16 @@ class _RegisterPageState extends State<RegisterPage> {
                   Icons.contact_mail_outlined,
                   keyboardType: TextInputType.emailAddress,
                 ),
+                const SizedBox(height: 14),
+                _buildField(
+                  _guardianPhoneController,
+                  "Guardian's Phone Number (optional)",
+                  Icons.phone_outlined,
+                  keyboardType: TextInputType.phone,
+                ),
                 const SizedBox(height: 8),
                 const Text(
-                  "Alerts will be sent to this email during SOS.",
+                  "SOS alerts will be sent to this number.",
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
                 const SizedBox(height: 14),

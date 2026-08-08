@@ -10,8 +10,9 @@ class AuthService {
     required String name,
     required String email,
     required String password,
-    required String role, // 'user', 'guardian', 'admin'
-    String? guardianEmail, // only needed if role == 'user'
+    required String role,
+    String? guardianEmail,
+    String? guardianPhone,
   }) async {
     try {
       // 1. Create Firebase Auth account
@@ -29,6 +30,7 @@ class AuthService {
         'email': email.trim(),
         'role': role,
         'guardianEmail': guardianEmail ?? '',
+        'guardianPhone': guardianPhone ?? '',
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -54,7 +56,8 @@ class AuthService {
       final String uid = cred.user!.uid;
 
       // Fetch user role from Firestore
-      final DocumentSnapshot doc = await _db.collection('users').doc(uid).get();
+      final DocumentSnapshot doc =
+      await _db.collection('users').doc(uid).get();
 
       if (!doc.exists) {
         return {'success': false, 'error': 'User profile not found.'};
