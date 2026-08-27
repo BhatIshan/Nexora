@@ -1,47 +1,67 @@
-import 'package:url_launcher/url_launcher.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
 
 class SmsService {
-  // Send SOS SMS to guardian with live location link
-  static Future<void> sendSosAlert({
+  static const String _apiKey =
+      'oC2PQyzGIBk9Tb8aN6MhUHRrXnctSi01WpsqwjefAEYDLx3KuvM8h75Sdbn1rYNzwIpPcDUBWJ9T3uQv';
+
+  static Future<bool> sendSosAlert({
     required String guardianPhone,
     required double lat,
     required double lng,
     required String userName,
   }) async {
-    final String locationLink =
-        'https://www.google.com/maps?q=$lat,$lng';
+    try {
+      final String locationLink =
+          'https://www.google.com/maps?q=$lat,$lng';
 
-    final String message =
-        '🚨 EMERGENCY ALERT from Nexora!\n\n'
-        '$userName needs immediate help!\n\n'
-        'Live Location:\n$locationLink\n\n'
-        'Please respond immediately or contact authorities.\n'
-        '- Nexora Safety App';
+      final String message =
+          'EMERGENCY ALERT from Nexora! '
+          '$userName needs immediate help! '
+          'Live Location: $locationLink '
+          'Please respond immediately or contact authorities. '
+          '- Nexora Safety App';
 
-    final Uri smsUri = Uri(
-      scheme: 'sms',
-      path: guardianPhone,
-      queryParameters: {'body': message},
-    );
+      String phone = guardianPhone
+          .replaceAll('+91', '')
+          .replaceAll(' ', '')
+          .trim();
 
-    if (await canLaunchUrl(smsUri)) {
-      await launchUrl(smsUri);
-    }
-  }
+      debugPrint('📱 Sending SMS to: $phone');
 
-  // Send a custom SMS message
-  static Future<void> sendCustomSms({
-    required String phoneNumber,
-    required String message,
-  }) async {
-    final Uri smsUri = Uri(
-      scheme: 'sms',
-      path: phoneNumber,
-      queryParameters: {'body': message},
-    );
+      final response = await http.post(
+        Uri.parse('https://www.fast2sms.com/dev/bulkV2'),
+        headers: {
+          'authorization': _apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'route': 'v3',
+          'sender_id': 'FSTSMS',
+          'message': message,
+          'language': 'english',
+          'flash': 0,
+          'numbers': phone,
+        }),
+      );
 
-    if (await canLaunchUrl(smsUri)) {
-      await launchUrl(smsUri);
+      debugPrint('📡 Status: ${response.statusCode}');
+      debugPrint('📡 Response: ${response.body}');
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 &&
+          responseData['return'] == true) {
+        debugPrint('✅ SMS sent to $phone');
+        return true;
+      } else {
+        debugPrint('❌ SMS failed: $responseData');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('❌ SMS error: $e');
+      return false;
     }
   }
 }
