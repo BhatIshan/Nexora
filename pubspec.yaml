@@ -45,6 +45,8 @@ dependencies:
   # Voice Detection
   speech_to_text: ^7.0.0
 
+  webview_flutter: ^4.4.2
+
   # Audio Recording — added back in Step 4
   # record: ^5.2.1
 
